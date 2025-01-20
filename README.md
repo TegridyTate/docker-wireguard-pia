@@ -1,6 +1,6 @@
 # docker-wireguard-pia
 
-A Docker container for using WireGuard with PIA.
+A Docker container for using WireGuard with PIA, forked from https://github.com/thrnz/docker-wireguard-pia, to enable setting listening port using qbittorrent more easily.
 
 ## Requirements
 * Ideally the host should already support WireGuard. Pre 5.6 kernels may need to have the module manually installed. `wg-quick` should automatically fall back to a userspace implementation (`wireguard-go`) if needed, however the container may need access to the `/dev/net/tun` device for this to work.
