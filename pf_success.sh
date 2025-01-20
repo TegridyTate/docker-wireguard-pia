@@ -22,4 +22,9 @@ if [ -n "$PF_DEST_IP" ] && [ -n "$FWD_IFACE" ]; then
 fi
 
 # Run another user-defined script/command if defined
-[ -n "$PORT_SCRIPT" ] && echo "$(date): Running user-defined command: $PORT_SCRIPT" && eval "$PORT_SCRIPT $1" &
+echo "QBITTORRENT_USERNAME: $QBITTORRENT_USERNAME"
+echo "QBITTORRENT_PASSWORD: $QBITTORRENT_PASSWORD"
+echo "LOCAL_IP: $LOCAL_IP"
+
+[ -n "$PORT_SCRIPT" ] && echo "$(date): Running user-defined command: $PORT_SCRIPT" && \
+    QBITTORRENT_USERNAME=$QBITTORRENT_USERNAME QBITTORRENT_PASSWORD=$QBITTORRENT_PASSWORD LOCAL_IP=$LOCAL_IP $PORT_SCRIPT $1 &
