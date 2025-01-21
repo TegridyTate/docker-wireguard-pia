@@ -24,6 +24,10 @@ The rest are optional:
 | ENV Var | Function |
 |-------|------|
 |```LOCAL_NETWORK=192.168.1.0/24```|Whether to route and allow input/output traffic to the LAN. LAN access will be unavailable if not specified. Multiple ranges can be specified, separated by a comma or space. Note that there may be DNS issues if this overlaps with PIA's default DNS servers (`10.0.0.243` and `10.0.0.242` as of July 2022). Custom DNS servers can be defined using `VPNDNS` (see below) if this is an issue.
+|```QBITTORRENT_HOST```|The address of the server qbittorrent is running on (eg. 192.168.178.10)
+|```QBITTORRENT_PORT```|The port qbittorrent is running on (eg. 8080)
+|```QBITTORRENT_USERNAME```|Your qbittorrent username
+|```QBITTORRENT_PASSWORD```|Your qbittorrent password
 |```KEEPALIVE=25```|If defined, PersistentKeepalive will be set to this in the WireGuard config.
 |```MTU=1420```|This can be used to override ```wg-quick```'s automatic MTU setting on the Wireguard interface if needed. By default this remains unset (ie. let ```wg-quick``` choose).
 |```VPNDNS=8.8.8.8, 8.8.4.4```|Use these DNS servers in the WireGuard config. PIA's DNS servers will be used if not specified. Use 0 to disable making any changes to the default container DNS settings. (Note: Using any DNS servers other than PIA's may lead to DNS queries being leaked outside the VPN connection.)
@@ -32,7 +36,6 @@ The rest are optional:
 |```PORT_FILE_CLEANUP=0/1```|Remove the file containing the forwarded port number on exit. Defaults to 0 if not specified.
 |```PORT_PERSIST=0/1```|Set to 1 to attempt to keep the same port forwarded when the container is restarted. The port number may persist for up to two months. Defaults to 0 (always acquire a new port number) if not specified.
 |`PORT_FATAL=0/1`|Whether to consider port forwarding errors as fatal or not. May be useful when combined with `EXIT_ON_FATAL` if needed. Defaults to 0 if not specified.
-|```PORT_SCRIPT=/path/to/script.sh```|A mounted custom script can be run inside the container once a port is successfully forwarded if needed. The forwarded port number is passed as the first command line argument. By default this remains unset. See [issue #26](https://github.com/thrnz/docker-wireguard-pia/issues/26) for more info.
 |```FIREWALL=0/1```|Whether to block non-WireGuard traffic. Defaults to 1 if not specified.
 |```EXIT_ON_FATAL=0/1```|There is no error recovery logic at this stage. If something goes wrong we simply go to sleep. By default the container will continue running until manually stopped. Set this to 1 to force the container to exit when an error occurs. Exiting on an error may not be desirable behaviour if other containers are sharing the connection.
 |```FATAL_SCRIPT=/path/to/script.sh```|A mounted custom script can be run inside the container if a fatal error occurs. By default this remains unset.

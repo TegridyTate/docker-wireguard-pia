@@ -21,10 +21,48 @@ if [ -n "$PF_DEST_IP" ] && [ -n "$FWD_IFACE" ]; then
   echo "$(date): Forwarding incoming VPN traffic on port $1 to $PF_DEST_IP:$1"
 fi
 
-# Run another user-defined script/command if defined
-echo "QBITTORRENT_USERNAME: $QBITTORRENT_USERNAME"
-echo "QBITTORRENT_PASSWORD: $QBITTORRENT_PASSWORD"
-echo "LOCAL_IP: $LOCAL_IP"
+# Retrieve the forwarded port from the WireGuard container
+PORT=$(cat /pia-shared/port.dat)
 
-[ -n "$PORT_SCRIPT" ] && echo "$(date): Running user-defined command: $PORT_SCRIPT" && \
-    QBITTORRENT_USERNAME=$QBITTORRENT_USERNAME QBITTORRENT_PASSWORD=$QBITTORRENT_PASSWORD LOCAL_IP=$LOCAL_IP $PORT_SCRIPT $1 &
+# Define qBittorrent Web API details
+QBITTORRENT_URL="http://$QBITTORRENT_HOST:$QBITTORRENT_PORT/api/v2"
+
+# Login to qBittorrent Web API
+COOKIE_JAR=$(mktemp)
+curl -s -X POST \
+  -c "$COOKIE_JAR" \
+  -d "username=$QBITTORRENT_USERNAME&password=$QBITTORRENT_PASSWORD" \
+  "$QBITTORRENT_URL/auth/login"
+
+# Extract the SID from the cookie
+SID=$(grep SID "$COOKIE_JAR" | awk '{print $NF}')
+
+if [ -z "$SID" ]; then
+  echo "Failed to authenticate with qBittorrent Web API"
+  rm "$COOKIE_JAR"
+  exit 1
+fi
+
+# Get the current listening port
+CURRENT_PORT=$(curl -s --cookie "SID=$SID" "$QBITTORRENT_URL/app/preferences" | jq -r '.listen_port')
+
+# Print out the current port
+echo "Current qBittorrent port is: $CURRENT_PORT"
+
+# Print out the port to be set
+echo "Setting qBittorrent port to $PORT"
+
+# Compare the current port with the new port and update if necessary
+if [ "$CURRENT_PORT" != "$PORT" ]; then
+  echo "Updating qBittorrent port to: $PORT"
+  curl -s -X POST \
+    --cookie "SID=$SID" \
+    --data "json={\"listen_port\":$PORT}" \
+    "$QBITTORRENT_URL/app/setPreferences"
+  echo "qBittorrent port updated to: $PORT"
+else
+  echo "Port is already set correctly."
+fi
+
+# Clean up the cookie file
+rm "$COOKIE_JAR"
